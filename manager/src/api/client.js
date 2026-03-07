@@ -1,9 +1,12 @@
 import axios from 'axios';
 
 const shouldUseProxy = import.meta.env.DEV && import.meta.env.VITE_USE_PROXY !== 'false';
+const defaultProdApi = 'https://backend.smartamenity.net';
+
 export const API_BASE = shouldUseProxy
   ? ''
-  : import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000';
+  : import.meta.env.VITE_API_BASE ||
+    (import.meta.env.DEV ? 'http://127.0.0.1:8000' : defaultProdApi);
 
 const storageKey = {
   access: 'managerAccessToken',
