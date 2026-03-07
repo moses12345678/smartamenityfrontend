@@ -52,7 +52,7 @@ do_start() {
   fi
 
   echo "Starting preview on 0.0.0.0:${PORT}..."
-  npm run preview:manager -- --host 0.0.0.0 --port "$PORT" >"$LOGFILE" 2>&1 &
+  npm run preview:manager -- --host 0.0.0.0 --port "$PORT" --strictPort >"$LOGFILE" 2>&1 &
   echo $! >"$PIDFILE"
   echo "Started (pid $(cat "$PIDFILE")). Logs: $LOGFILE"
 }
