@@ -6,10 +6,13 @@ import axios from 'axios';
 // `/api/...` and are picked up by the proxy. In non-dev, fall back to an explicit
 // API base URL or localhost.
 const shouldUseProxy = import.meta.env.DEV && import.meta.env.VITE_USE_PROXY !== 'false';
+const defaultProdApi = 'https://backend.smartamenity.net';
+
 export const API_BASE = shouldUseProxy
   ? ''
-  : import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000';
-export const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:3000';
+  : import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? 'http://127.0.0.1:8000' : defaultProdApi);
+
+export const APP_URL = import.meta.env.VITE_APP_URL || (import.meta.env.DEV ? 'http://localhost:3000' : 'https://smartamenity.net');
 
 const storage = {
   get(key) {
