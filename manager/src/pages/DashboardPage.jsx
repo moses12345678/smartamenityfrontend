@@ -177,13 +177,19 @@ export default function DashboardPage() {
                   {property.address && <p className="muted fine-print">{property.address}</p>}
                   <div className="invite-stack">
                     {property.invite_link && (
+                      // normalize local backend invite links to the public domain for display/copy
+                      (() => {
+                        const link = property.invite_link.replace('http://localhost:3000', 'https://smartamenity.net');
+                        return (
                       <div className="invite-row">
                         <span className="muted">Invite link</span>
-                        <code className="invite-code">{property.invite_link}</code>
-                        <button className="ghost tiny" onClick={() => navigator.clipboard.writeText(property.invite_link)}>
+                        <code className="invite-code">{link}</code>
+                        <button className="ghost tiny" onClick={() => navigator.clipboard.writeText(link)}>
                           Copy
                         </button>
                       </div>
+                        );
+                      })()
                     )}
                     {property.invite_token && (
                       <div className="invite-row">
