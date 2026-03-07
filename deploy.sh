@@ -15,7 +15,6 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PORT="${PORT:-4000}"
 PIDFILE="$ROOT/.manager-preview.pid"
 LOGFILE="$ROOT/.manager-preview.log"
-export NODE_ENV="${NODE_ENV:-production}"
 
 cd "$ROOT"
 
@@ -27,9 +26,9 @@ have_proc() {
 do_setup() {
   if command -v npm >/dev/null 2>&1; then
     if [[ -f package-lock.json ]]; then
-      npm ci
+      NPM_CONFIG_PRODUCTION=false npm ci
     else
-      npm install
+      NPM_CONFIG_PRODUCTION=false npm install
     fi
   else
     echo "npm is required but not found on PATH." >&2
