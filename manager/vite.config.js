@@ -19,6 +19,18 @@ export default defineConfig({
       }
     }
   },
+  preview: {
+    host: true,
+    port: 4000,
+    strictPort: true,
+    allowedHosts: ['smartamenity.net'],
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true
+      }
+    }
+  },
   resolve: {
     alias: {
       '@manager': path.resolve(__dirname, 'src')
