@@ -10,6 +10,7 @@ set -euo pipefail
 #   ./deploy.sh stop     # stop preview server
 #   ./deploy.sh restart  # stop then start
 #   ./deploy.sh status   # show server status
+#   ./deploy.sh deploy   # clean build (manager), verify, restart nginx
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PORT="${PORT:-4000}"
@@ -38,6 +39,22 @@ do_setup() {
 
 do_build() {
   npm run build:manager
+}
+
+do_clean_build() {
+  rm -rf "$ROOT/manager/dist" "$ROOT/node_modules/.vite"
+  npm run build:manager
+}
+
+do_verify_brand() {
+  local css="$ROOT/manager/dist/assets"
+  if ls "$css"/*.css >/dev/null 2>&1; then
+    if ! grep -qE "e11d48|f43f5e" "$css"/*.css; then
+      echo "Warning: expected manager red palette not found in built CSS." >&2
+    fi
+  else
+    echo "Warning: manager CSS not found (build may have failed)." >&2
+  fi
 }
 
 do_start() {
@@ -79,6 +96,15 @@ do_status() {
   fi
 }
 
+do_nginx_restart() {
+  if command -v systemctl >/dev/null 2>&1; then
+    sudo systemctl restart nginx
+    echo "Nginx restarted."
+  else
+    echo "systemctl not available; skipping nginx restart." >&2
+  fi
+}
+
 cmd="${1:-up}"
 
 case "$cmd" in
@@ -97,6 +123,12 @@ case "$cmd" in
     do_start
     ;;
   status) do_status ;;
+  deploy)
+    do_setup
+    do_clean_build
+    do_verify_brand
+    do_nginx_restart
+    ;;
   *)
     echo "Unknown command: $cmd" >&2
     exit 1
