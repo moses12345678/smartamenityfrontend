@@ -6,11 +6,11 @@ import ContactModal from '../components/ContactModal.jsx';
 const gallery = [
   {
     title: 'Resort-style pool',
-    src: 'https://images.unsplash.com/photo-1505843513577-22bb7d21e455?auto=format&fit=crop&w=1400&q=80'
+    src: '/pool.png'
   },
   {
     title: 'Strength & cardio',
-    src: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1400&q=80'
+    src: '/gym.png'
   },
   {
     title: 'Cabana lounges',
@@ -257,7 +257,9 @@ export default function HomePage() {
       </section>
 
       <footer className="home-footer fine-print">
-        <div>© {year} MEANC • SmartAmenity</div>
+        <div>
+          © {year} MEANC LLC · Software company · SmartAmenity
+        </div>
         <div className="footer-links">
           <button className="link-button" type="button" onClick={openContact}>
             Contact

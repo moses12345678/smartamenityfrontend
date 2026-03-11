@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
 
 :root {
   color-scheme: light;
-  font-family: 'Space Grotesk', 'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif;
+  font-family: 'Manrope', 'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
 
   --text: #0f172a;
@@ -24,13 +24,13 @@
   --topbar: rgba(255, 255, 255, 0.92);
   --topbar-border: rgba(15, 23, 42, 0.08);
 
-  --primary: #2563eb;
-  --primary-strong: #1d4ed8;
-  --primary-gradient: linear-gradient(120deg, #2563eb, #0ea5e9 70%);
+  --primary: #e11d48;
+  --primary-strong: #be123c;
+  --primary-gradient: linear-gradient(120deg, #f43f5e, #e11d48 70%);
   --primary-contrast: #ffffff;
 
-  --accent: #10b981;
-  --accent-2: #0ea5e9;
+  --accent: #f97316;
+  --accent-2: #f43f5e;
   --danger: #ef4444;
 
   --code-bg: #e2e8f0;
@@ -72,13 +72,13 @@
   --topbar: rgba(10, 16, 30, 0.8);
   --topbar-border: rgba(124, 200, 255, 0.16);
 
-  --primary: #4ea7ff;
-  --primary-strong: #7cc8ff;
-  --primary-gradient: linear-gradient(120deg, #4ea7ff, #7cf3c4 70%);
+  --primary: #ff6b6b;
+  --primary-strong: #ff4f5a;
+  --primary-gradient: linear-gradient(120deg, #ff8fa3, #ff4f5a 70%);
   --primary-contrast: #071023;
 
-  --accent: #7cf3c4;
-  --accent-2: #7cc8ff;
+  --accent: #ffb347;
+  --accent-2: #ff8fa3;
   --danger: #ff6b6b;
 
   --code-bg: rgba(124, 200, 255, 0.12);
@@ -403,6 +403,13 @@ body {
   color: #f8fbff;
   position: relative;
   overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(7, 10, 18, 0.55), rgba(7, 10, 18, 0.8)),
+    url('/pool.png');
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
 }
 
 .panel-top {
@@ -442,8 +449,8 @@ body {
 .bar {
   width: 100%;
   border-radius: 10px;
-  background: linear-gradient(180deg, #7cf3c4 0%, #4ea7ff 100%);
-  box-shadow: 0 10px 22px rgba(78, 167, 255, 0.35);
+  background: linear-gradient(180deg, #f97316 0%, #e11d48 100%);
+  box-shadow: 0 10px 22px rgba(225, 29, 72, 0.4);
   animation: pulseBar 2.2s ease-in-out infinite;
   transform-origin: bottom;
   height: 100%;
