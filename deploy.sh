@@ -37,13 +37,18 @@ do_setup() {
   fi
 }
 
-do_build() {
+do_build_main() {
+  npm run build
+}
+
+do_build_manager() {
   npm run build:manager
 }
 
 do_clean_build() {
-  rm -rf "$ROOT/manager/dist" "$ROOT/node_modules/.vite"
-  npm run build:manager
+  rm -rf "$ROOT/dist" "$ROOT/manager/dist" "$ROOT/node_modules/.vite"
+  do_build_main
+  do_build_manager
 }
 
 do_verify_brand() {
