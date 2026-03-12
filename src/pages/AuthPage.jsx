@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import AuthForm from '../components/AuthForm.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import poolBackground from '../assets/images/pool-backgrouund.jpg';
@@ -24,18 +24,30 @@ export default function AuthPage() {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <div className="card wide">
-        <div className="card-header">
-          <p className="eyebrow">SmartAmenity</p>
-          <h2>Log in</h2>
-          <p className="muted">Access amenities with your invite.</p>
+      <div className="auth-topbar">
+        <Link to="/" className="logo" aria-label="SmartAmenity home">
+          <span className="logo-mark">SA</span>
+          <span className="logo-text">SmartAmenity</span>
+        </Link>
+        <Link className="ghost-button ghost-light" to="/">
+          ← Back to home
+        </Link>
+      </div>
+
+      <div className="auth-shell">
+        <div className="card wide glass-card">
+          <div className="card-header">
+            <p className="eyebrow">SmartAmenity</p>
+            <h2>Log in</h2>
+            <p className="muted">Access amenities with your invite.</p>
+          </div>
+          <AuthForm
+            mode="login"
+            inviteToken={inviteToken}
+            onSuccess={() => navigate('/dashboard')}
+          />
+          <div className="switcher muted">Don’t have an account? Ask property staff to invite you.</div>
         </div>
-        <AuthForm
-          mode="login"
-          inviteToken={inviteToken}
-          onSuccess={() => navigate('/dashboard')}
-        />
-        <div className="switcher muted">Don’t have an account? Ask property staff to invite you.</div>
       </div>
     </div>
   );

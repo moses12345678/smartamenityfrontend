@@ -56,7 +56,7 @@ const Shell = ({ children }) => {
   return (
     <div className="page-bg">
       {showTopBar && (
-        <header className="top-bar">
+        <header className="top-bar glass-topbar">
           <Link to="/" className="logo" aria-label="SmartAmenity home">
             <span className="logo-mark">SA</span>
             <span className="logo-text">SmartAmenity</span>
