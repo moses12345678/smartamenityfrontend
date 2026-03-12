@@ -7,9 +7,23 @@ import HomePage from './pages/HomePage.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 import { leaveProperty } from './api/properties.js';
 
+const MANAGER_APP_URL = import.meta.env.VITE_MANAGER_APP_URL || 'https://manager.smartamenity.net';
+const isManagerRole = (user) => {
+  const role = (user?.role || '').toUpperCase();
+  return role === 'MANAGER' || role === 'ADMIN';
+};
+
 const RequireAuth = ({ children }) => {
-  const { tokens } = useAuth();
+  const { tokens, user, userLoading } = useAuth();
   if (!tokens?.access) return <Navigate to="/" replace />;
+
+  if (userLoading) return <p className="muted" style={{ padding: '2rem' }}>Checking your access…</p>;
+
+  if (isManagerRole(user)) {
+    // Managers should use the manager app
+    window.location.href = `${MANAGER_APP_URL}/login`;
+    return null;
+  }
   return children;
 };
 

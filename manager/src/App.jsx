@@ -8,10 +8,19 @@ import PrivacyPage from './pages/PrivacyPage.jsx';
 import CareersPage from './pages/CareersPage.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 
+const isManagerRole = (user) => {
+  const role = (user?.role || '').toUpperCase();
+  return role === 'MANAGER' || role === 'ADMIN';
+};
+
 const RequireAuth = ({ children }) => {
-  const { tokens, user } = useAuth();
+  const { tokens, user, userLoading, logout } = useAuth();
   if (!tokens?.access) return <Navigate to="/login" replace />;
-  if (user && user.role && user.role !== 'MANAGER' && user.role !== 'ADMIN') {
+
+  if (userLoading) return <p className="muted" style={{ padding: '2rem' }}>Checking your access…</p>;
+
+  if (user && !isManagerRole(user)) {
+    logout();
     return <Navigate to="/login" replace />;
   }
   return children;

@@ -17,7 +17,7 @@ const fieldError = (err) => {
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { saveTokens, setUser } = useAuth();
+  const { saveTokens, setUser, logout } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mustChange, setMustChange] = useState(false);
@@ -36,6 +36,7 @@ export default function LoginPage() {
       const role = data.user?.role;
       if (role !== 'MANAGER' && role !== 'ADMIN') {
         setError('This account is not authorized for the manager dashboard.');
+        logout();
         setLoading(false);
         return;
       }

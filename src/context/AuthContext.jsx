@@ -1,5 +1,6 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { clearTokens, getTokens, setTokens as persistTokens } from '../api/client.js';
+import { fetchCurrentUser } from '../api/users.js';
 
 const AuthContext = createContext();
 
@@ -18,6 +19,7 @@ const loadJson = (key) => {
 export const AuthProvider = ({ children }) => {
   const [tokens, setTokens] = useState(() => getTokens());
   const [user, setUserState] = useState(() => loadJson('authUser'));
+  const [userLoading, setUserLoading] = useState(false);
   const [joinedProperty, setJoinedPropertyState] = useState(() => loadJson('currentProperty'));
   const [pendingInvite, setPendingInviteState] = useState(
     () => (typeof localStorage !== 'undefined' ? localStorage.getItem('inviteToken') : '') || ''
@@ -62,12 +64,34 @@ export const AuthProvider = ({ children }) => {
     saveJoinedProperty(null);
   }, [saveJoinedProperty, saveUser]);
 
+  // Ensure we have a fresh user object when tokens are present (e.g., after refresh)
+  useEffect(() => {
+    let cancelled = false;
+    const hydrate = async () => {
+      if (!tokens?.access || user || userLoading) return;
+      setUserLoading(true);
+      try {
+        const me = await fetchCurrentUser();
+        if (!cancelled) saveUser(me);
+      } catch (e) {
+        if (!cancelled) logout();
+      } finally {
+        if (!cancelled) setUserLoading(false);
+      }
+    };
+    hydrate();
+    return () => {
+      cancelled = true;
+    };
+  }, [tokens?.access, user, userLoading, saveUser, logout]);
+
   const value = useMemo(
     () => ({
       tokens,
       user,
       joinedProperty,
       pendingInvite,
+      userLoading,
       saveTokens,
       saveUser,
       savePendingInvite,

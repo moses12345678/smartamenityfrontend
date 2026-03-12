@@ -5,6 +5,12 @@ import { joinProperty } from '../api/properties.js';
 import { fetchCurrentUser } from '../api/users.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
+const MANAGER_APP_URL = import.meta.env.VITE_MANAGER_APP_URL || 'https://manager.smartamenity.net';
+const isManagerRole = (user) => {
+  const role = (user?.role || '').toUpperCase();
+  return role === 'MANAGER' || role === 'ADMIN';
+};
+
 const fieldError = (error) => {
   if (!error) return 'Request failed. Please try again.';
   if (typeof error === 'string') return error;
@@ -26,7 +32,8 @@ export default function AuthForm({ mode = 'login', inviteToken, onSuccess, compa
     savePendingInvite,
     saveTokens,
     saveUser,
-    saveJoinedProperty
+    saveJoinedProperty,
+    logout
   } = useAuth();
   const [form, setForm] = useState({
     email: '',
@@ -92,6 +99,13 @@ export default function AuthForm({ mode = 'login', inviteToken, onSuccess, compa
       const { access, refresh, user } = authResponse;
       if (access) saveTokens(access, refresh);
       if (user) saveUser(user);
+
+      // Managers should authenticate via the manager portal, not the resident app
+      if (isManagerRole(user)) {
+        logout();
+        window.location.href = `${MANAGER_APP_URL}/login`;
+        return;
+      }
 
       // Persist invite token if present
       if (tokenForJoin) savePendingInvite(tokenForJoin);
