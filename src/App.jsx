@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import HomePage from './pages/HomePage.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 import { leaveProperty } from './api/properties.js';
+import { Link } from 'react-router-dom';
 
 const MANAGER_APP_URL = import.meta.env.VITE_MANAGER_APP_URL || 'https://manager.smartamenity.net';
 const isManagerRole = (user) => {
@@ -56,10 +57,10 @@ const Shell = ({ children }) => {
     <div className="page-bg">
       {showTopBar && (
         <header className="top-bar">
-          <div className="logo">
+          <Link to="/" className="logo" aria-label="SmartAmenity home">
             <span className="logo-mark">SA</span>
             <span className="logo-text">SmartAmenity</span>
-          </div>
+          </Link>
           <div className="top-actions">
             <button className="ghost-button" onClick={toggleTheme}>
               {theme === 'dark' ? 'Light mode' : 'Dark mode'}

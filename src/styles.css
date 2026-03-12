@@ -64,6 +64,7 @@ body {
   margin: 0;
   background: transparent;
   color: var(--text);
+  overflow-x: hidden;
 }
 
 a {
@@ -93,7 +94,7 @@ a {
 
 .hero-copy h1 {
   margin: 8px 0 10px;
-  font-size: clamp(26px, 3.2vw, 34px);
+  font-size: clamp(24px, 3.2vw, 34px);
   line-height: 1.15;
 }
 
@@ -131,6 +132,7 @@ a {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .resident-hero {
@@ -145,7 +147,7 @@ a {
 
 .photo-card {
   position: relative;
-  min-height: 220px;
+  min-height: 200px;
   aspect-ratio: 4 / 3;
   background-size: cover;
   background-position: center;
@@ -166,7 +168,7 @@ a {
 .photo-overlay {
   position: absolute;
   inset: 0;
-  padding: 14px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -397,6 +399,7 @@ a {
   font-weight: 700;
   letter-spacing: 0.4px;
   color: var(--text);
+  text-decoration: none;
 }
 
 .logo-mark {
@@ -560,6 +563,34 @@ button.primary {
   background: linear-gradient(135deg, var(--primary), var(--primary-strong));
   color: #ffffff;
   box-shadow: 0 10px 24px rgba(37, 99, 235, 0.25);
+}
+
+/* Apply primary styling to anchor CTAs too */
+a.primary,
+.primary.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.25);
+  transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+}
+
+a.primary:hover,
+.primary.cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.3);
+}
+
+a.primary:active,
+.primary.cta:active {
+  transform: translateY(0);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.24);
 }
 
 button.ghost,
@@ -833,6 +864,129 @@ button:hover:not(:disabled) {
 @media (max-width: 960px) {
   .invite-grid { grid-template-columns: 1fr; }
   .invite-hero { grid-template-columns: 1fr; }
+}
+
+/* ---------- Responsive refinements ---------- */
+@media (max-width: 820px) {
+  .content {
+    max-width: 100%;
+    padding: 24px 16px 56px;
+  }
+  .home {
+    gap: 24px;
+  }
+  .card {
+    padding: 16px;
+  }
+  .top-bar {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+  .top-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    width: 100%;
+  }
+  .top-actions .ghost-button {
+    padding: 8px 10px;
+  }
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+  .hero-copy h1 {
+    font-size: clamp(24px, 5vw, 30px);
+  }
+  .hero-visual {
+    width: 100%;
+  }
+  .resident-visual {
+    grid-template-columns: 1fr;
+  }
+  .photo-card {
+    min-height: 180px;
+  }
+  .home-cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .cta-buttons {
+    width: 100%;
+  }
+  .cta-buttons .primary,
+  .cta-buttons .ghost-button {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+  .dashboard .grid {
+    grid-template-columns: 1fr;
+  }
+  .amenity-card {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 540px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .page-bg {
+    padding: 0 8px 32px;
+  }
+  .logo-text {
+    font-size: 14px;
+  }
+  .hero-meta {
+    gap: 8px;
+  }
+  .home-grid,
+  .gallery-grid,
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+  .visual-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .auth-page {
+    padding: 20px 12px;
+  }
+  .auth-card,
+  .card.wide {
+    width: 100%;
+  }
+  .hero {
+    border-radius: 14px;
+    padding: 14px;
+    gap: 12px;
+  }
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .hero-actions .primary,
+  .hero-actions .ghost-button {
+    width: 100%;
+    justify-content: center;
+  }
+  .invite-grid {
+    gap: 12px;
+  }
+  .invite-hero {
+    padding: 14px;
+  }
+  .guest-input-wrap {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .actions button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .dashboard .grid {
