@@ -30,8 +30,10 @@ export default function HomePage() {
     <div className="home">
       <section className="hero resident-hero">
         <div className="hero-copy">
-          <span className="pill badge">For residents</span>
-          <h1>Your building amenities, at a glance.</h1>
+          <div className="hero-head">
+            <span className="pill badge">For residents</span>
+            <h1 className="hero-title">Your amenities, at a glance.</h1>
+          </div>
           <p className="muted">
             Check into the pool or gym in seconds. See capacity live, add guests, and head out without lines.
           </p>
