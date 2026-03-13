@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AmenityCard from '../components/AmenityCard.jsx';
-import { checkInAmenity, checkOutAmenity, fetchAmenityStatus } from '../api/amenities.js';
+import { checkInAmenity, checkInAmenityQr, checkOutAmenity, fetchAmenityStatus, generateAmenityQr } from '../api/amenities.js';
 import { fetchInvite, fetchPropertyAmenities, joinProperty, leaveProperty } from '../api/properties.js';
 import { fetchCurrentUser } from '../api/users.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -95,14 +95,18 @@ export default function DashboardPage() {
   const [amenities, setAmenities] = useState(joinedProperty?.amenities || []);
   const [guestCounts, setGuestCounts] = useState({});
   const [checkInTimes, setCheckInTimes] = useState({});
+  const [lastUpdated, setLastUpdated] = useState({});
   const [loading, setLoading] = useState(!joinedProperty);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const [activeSessions, setActiveSessions] = useState({});
   const [rejoining, setRejoining] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [amenitiesSlugLoaded, setAmenitiesSlugLoaded] = useState(null);
   const [loadedMe, setLoadedMe] = useState(false);
+  const [qrModal, setQrModal] = useState({ open: false, amenity: null, loading: false, error: '', data: null, expires: 1440 });
+  const [qrCheckModal, setQrCheckModal] = useState({ open: false, token: '', loading: false, error: '' });
   const sessionTimers = useRef({});
   const residentActive = property?.resident ? property.resident.active !== false : true;
   const residentStatusLabel = residentActive ? 'Active' : 'Inactive';
@@ -217,6 +221,7 @@ export default function DashboardPage() {
         return next;
       });
     }
+    setLastUpdated((prev) => ({ ...prev, [id]: Date.now() }));
   };
 
   const loadAmenitiesForProperty = async (slug) => {
@@ -271,6 +276,15 @@ export default function DashboardPage() {
       }
     };
     run();
+    const id = setInterval(run, 12000);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') run();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, [amenities.length]);
 
   const handleCheckIn = async (amenity) => {
@@ -311,6 +325,8 @@ export default function DashboardPage() {
           // ignore auto checkout failure
         }
       }, 120 * 60 * 1000);
+      setToast({ message: `Checked in to ${amenity.name} · session started`, type: 'success' });
+      setTimeout(() => setToast(null), 3500);
     } catch (err) {
       setError(err?.response?.data?.detail || 'Check-in failed (guest limits may apply).');
     } finally {
@@ -331,6 +347,8 @@ export default function DashboardPage() {
       await refreshAmenity(amenity.id);
       clearTimeout(sessionTimers.current[`reminder_${amenity.id}`]);
       clearTimeout(sessionTimers.current[`autocheckout_${amenity.id}`]);
+      setToast({ message: `Checked out of ${amenity.name}`, type: 'info' });
+      setTimeout(() => setToast(null), 3200);
     } catch (err) {
       setError(err?.response?.data?.detail || 'Check-out failed');
     } finally {
@@ -388,6 +406,74 @@ export default function DashboardPage() {
       setError(err?.response?.data?.detail || 'Could not leave the property right now.');
     } finally {
       setLeaving(false);
+    }
+  };
+
+  const openQrGenerator = (amenity) => {
+    setQrModal({ open: true, amenity, loading: false, error: '', data: null, expires: 1440 });
+  };
+
+  const closeQrGenerator = () => setQrModal((prev) => ({ ...prev, open: false, loading: false, error: '', data: null }));
+
+  const submitQrGenerator = async () => {
+    if (!qrModal.amenity) return;
+    setQrModal((prev) => ({ ...prev, loading: true, error: '' }));
+    try {
+      const payload = await generateAmenityQr(qrModal.amenity.id, qrModal.expires);
+      setQrModal((prev) => ({ ...prev, loading: false, data: payload }));
+    } catch (err) {
+      setQrModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: err?.response?.data?.detail || 'Could not generate QR'
+      }));
+    }
+  };
+
+  const extractToken = (raw) => {
+    if (!raw) return '';
+    const trimmed = raw.trim();
+    try {
+      const u = new URL(trimmed);
+      const qsToken = u.searchParams.get('token');
+      if (qsToken) return qsToken;
+      const match = u.pathname.match(/qr-checkin\/([^/]+)/i);
+      if (match?.[1]) return match[1];
+    } catch (_) {
+      // not a URL
+    }
+    return trimmed;
+  };
+
+  const openQrCheckModal = () => setQrCheckModal({ open: true, token: '', loading: false, error: '' });
+  const closeQrCheckModal = () => setQrCheckModal({ open: false, token: '', loading: false, error: '' });
+
+  const submitQrCheckIn = async () => {
+    const token = extractToken(qrCheckModal.token);
+    if (!token) {
+      setQrCheckModal((prev) => ({ ...prev, error: 'Enter or scan a QR token first.' }));
+      return;
+    }
+    setQrCheckModal((prev) => ({ ...prev, loading: true, error: '' }));
+    try {
+      const res = await checkInAmenityQr(token);
+      const amenityId = res.amenity || res.amenity_id || res.amenityId;
+      if (amenityId) {
+        await refreshAmenity(amenityId);
+      }
+      if (res.check_in_time && amenityId) {
+        setCheckInTimes((prev) => ({ ...prev, [amenityId]: res.check_in_time }));
+        setActiveSessions((prev) => ({ ...prev, [amenityId]: true }));
+      }
+      setToast({ message: 'QR check-in successful', type: 'success' });
+      setTimeout(() => setToast(null), 3500);
+      closeQrCheckModal();
+    } catch (err) {
+      setQrCheckModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: err?.response?.data?.detail || 'QR check-in failed'
+      }));
     }
   };
 
@@ -489,6 +575,11 @@ export default function DashboardPage() {
             </p>
           )}
         </div>
+        <div className="actions">
+          <button className="ghost-button" type="button" onClick={openQrCheckModal}>
+            QR check-in
+          </button>
+        </div>
       </div>
 
       <div className="grid">
@@ -510,6 +601,7 @@ export default function DashboardPage() {
                 key={amenity.id || amenity.name}
                 amenity={amenity}
                 guestCount={guestCounts[amenity.id] ?? 0}
+                lastUpdated={lastUpdated[amenity.id]}
                 onGuestCountChange={(count) =>
                   setGuestCounts((prev) => ({ ...prev, [amenity.id]: count }))
                 }
@@ -524,6 +616,8 @@ export default function DashboardPage() {
                 timezone={propertyTimezone}
                 timezoneLabel={propertyTimezoneLabel}
                 checkInTime={checkInTimes[amenity.id]}
+                showGenerate={Boolean(user?.is_staff)}
+                onGenerateQr={openQrGenerator}
               />
             ))
         ) : (
@@ -532,6 +626,92 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+      {qrModal.open && (
+        <div className="modal-backdrop" onClick={closeQrGenerator}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="card-header row">
+              <div>
+                <p className="eyebrow">Generate QR</p>
+                <h3>{qrModal.amenity?.name}</h3>
+              </div>
+              <button className="ghost-button" type="button" onClick={closeQrGenerator}>Close</button>
+            </div>
+            <div className="input-group inline">
+              <span>Expires (minutes)</span>
+              <input
+                type="number"
+                min="5"
+                max={43200}
+                value={qrModal.expires}
+                onChange={(e) =>
+                  setQrModal((prev) => ({ ...prev, expires: Math.max(5, Math.min(43200, Number(e.target.value) || 0)) }))
+                }
+              />
+            </div>
+            {qrModal.error && <div className="error-chip">{qrModal.error}</div>}
+            <div className="actions" style={{ marginTop: 10 }}>
+              <button className="primary" type="button" onClick={submitQrGenerator} disabled={qrModal.loading}>
+                {qrModal.loading ? 'Generating…' : 'Generate QR'}
+              </button>
+            </div>
+            {qrModal.data && (
+              <div className="qr-box">
+                <p className="muted tiny">
+                  Expires at {qrModal.data.expires_at || '—'}
+                </p>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(qrModal.data.qr_value || qrModal.data.token)}`}
+                  alt="Amenity QR"
+                  style={{ width: '100%', maxWidth: 260, borderRadius: 12, background: '#fff' }}
+                />
+                <div className="qr-details">
+                  <code className="qr-token">{qrModal.data.token}</code>
+                  {qrModal.data.qr_url && (
+                    <p className="muted tiny">Link: {qrModal.data.qr_url}</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {qrCheckModal.open && (
+        <div className="modal-backdrop" onClick={closeQrCheckModal}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="card-header row">
+              <div>
+                <p className="eyebrow">QR check-in</p>
+                <h3>Scan or paste token</h3>
+              </div>
+              <button className="ghost-button" type="button" onClick={closeQrCheckModal}>Close</button>
+            </div>
+            <div className="input-group">
+              <span>Token or link</span>
+              <input
+                value={qrCheckModal.token}
+                onChange={(e) => setQrCheckModal((prev) => ({ ...prev, token: e.target.value }))}
+                placeholder="Paste QR token or link"
+              />
+            </div>
+            {qrCheckModal.error && <div className="error-chip">{qrCheckModal.error}</div>}
+            <div className="actions">
+              <button className="primary" type="button" onClick={submitQrCheckIn} disabled={qrCheckModal.loading}>
+                {qrCheckModal.loading ? 'Checking in…' : 'Check in from QR'}
+              </button>
+            </div>
+            <p className="muted tiny">
+              Scanning: use your device camera/QR app, then tap the link or copy the token here to check in.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className={`toast ${toast.type}`}>
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }

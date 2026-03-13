@@ -149,58 +149,35 @@ export default function DashboardPage() {
                   <button className="primary primary-lg">Launch manager</button>
                   <button className="ghost ghost-contrast">Book a live walkthrough</button>
                 </div>
-                <div className="hero-meta">
-                  <span className="pill soft tiny-pill">SSO ready</span>
-                  <span className="pill soft tiny-pill">SOC2 in progress</span>
-                  <span className="pill soft tiny-pill">9s live refresh</span>
-                  <span className="pill soft tiny-pill">Operators first</span>
-                </div>
-                <div className="hero-kpi">
+                <div className="hero-kpi compact">
                   <div className="kpi-card">
                     <p className="muted tiny">Active amenities</p>
                     <strong>{activeAmenities}</strong>
                   </div>
                   <div className="kpi-card">
-                    <p className="muted tiny">Open right now</p>
+                    <p className="muted tiny">Open now</p>
                     <strong>{openAmenities}</strong>
                   </div>
                   <div className="kpi-card">
                     <p className="muted tiny">Avg utilization</p>
                     <strong>{averageUtilization}%</strong>
                   </div>
-                  <div className="kpi-card">
-                    <p className="muted tiny">Residents</p>
-                    <strong>{residents.length}</strong>
-                  </div>
                 </div>
                 <div className="hero-invite">
-                  {property.address && <p className="muted fine-print">{property.address}</p>}
-                  <div className="invite-stack">
-                    {property.invite_link && (
-                      // normalize local backend invite links to the public domain for display/copy
-                      (() => {
-                        const link = property.invite_link.replace('http://localhost:3000', 'https://smartamenity.net');
-                        return (
-                      <div className="invite-row">
-                        <span className="muted">Invite link</span>
-                        <code className="invite-code">{link}</code>
-                        <button className="ghost tiny" onClick={() => navigator.clipboard.writeText(link)}>
-                          Copy
-                        </button>
-                      </div>
-                        );
-                      })()
-                    )}
-                    {property.invite_token && (
-                      <div className="invite-row">
-                        <span className="muted">Invite token</span>
-                        <code className="invite-code">{property.invite_token}</code>
-                        <button className="ghost tiny" onClick={() => navigator.clipboard.writeText(property.invite_token)}>
-                          Copy
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  {property.invite_link && (
+                    (() => {
+                      const link = property.invite_link.replace('http://localhost:3000', 'https://smartamenity.net');
+                      return (
+                        <div className="invite-row">
+                          <span className="muted">Invite link</span>
+                          <code className="invite-code">{link}</code>
+                          <button className="ghost tiny" onClick={() => navigator.clipboard.writeText(link)}>
+                            Copy
+                          </button>
+                        </div>
+                      );
+                    })()
+                  )}
                 </div>
               </div>
 
@@ -217,7 +194,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="mini-bars">
-                  {snapshotBars.map((height, idx) => (
+                  {snapshotBars.slice(0, 3).map((height, idx) => (
                     <div className="bar-col" key={idx}>
                       <div className="bar" style={{ height: `${height}%` }} />
                       <span className="muted tiny">{snapshotLabels[idx]}</span>
@@ -240,12 +217,6 @@ export default function DashboardPage() {
                     <p className="muted tiny">Next block reset</p>
                     <strong>{featuredAmenity?.close_time || '—'}</strong>
                   </div>
-                </div>
-
-                <div className="panel-tags">
-                  <button className="ghost tiny">Invite link ready</button>
-                  <button className="ghost tiny">Auto-close after quiet hours</button>
-                  <button className="ghost tiny">Noise-safe hours</button>
                 </div>
 
                 <div className="floating-card snapshot-footer">

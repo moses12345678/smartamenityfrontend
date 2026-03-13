@@ -135,10 +135,11 @@ export default function AuthForm({ mode = 'login', inviteToken, onSuccess, compa
 
   return (
     <form className={`card auth-card ${compact ? 'compact' : ''}`} onSubmit={handleSubmit}>
-      <div className="card-header">
-        <h3>Log in</h3>
+      <div className="card-header auth-header">
+        <span className="pill badge">Resident sign-in</span>
+        <h3>Sign in to SmartAmenity</h3>
         <p className="muted">
-          Use your password. First-time users can enter the temporary code; you’ll be prompted to set a new password.
+          Check capacity, add guests, and jump into your building amenities without lines.
         </p>
       </div>
       <label className="input-group">
@@ -162,13 +163,15 @@ export default function AuthForm({ mode = 'login', inviteToken, onSuccess, compa
               placeholder="Password (or first-time code)"
               value={form.password}
               onChange={handleChange}
-              required
-            />
-          </label>
-          {error && <div className="error-chip">{error}</div>}
-      <button className="primary" type="submit" disabled={loading}>
-        {loading ? 'Working…' : 'Log in'}
-      </button>
+            required
+          />
+        </label>
+        {error && <div className="error-chip">{error}</div>}
+          <div className="auth-actions">
+            <button className="primary" type="submit" disabled={loading}>
+              {loading ? 'Working…' : 'Log in'}
+            </button>
+          </div>
         </>
       )}
 

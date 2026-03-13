@@ -62,7 +62,10 @@ export default function AmenityCard({
   activeAmenityName = '',
   timezone,
   timezoneLabel,
-  checkInTime
+  checkInTime,
+  lastUpdated,
+  showGenerate = false,
+  onGenerateQr = null
 }) {
   const parseMinutes = (t) => {
     if (!t) return null;
@@ -187,9 +190,10 @@ export default function AmenityCard({
       : null;
 
   const [showClosedHint, setShowClosedHint] = useState(false);
-  const [infoMessage, setInfoMessage] = useState('Please check in/out to help everyone see real-time capacity.');
+  const [infoMessage, setInfoMessage] = useState('');
   const [elapsedLabel, setElapsedLabel] = useState('');
   const [startLabel, setStartLabel] = useState('');
+  const [showHours, setShowHours] = useState(false);
 
   useEffect(() => {
     if (!computedClosed) setShowClosedHint(false);
@@ -222,19 +226,9 @@ export default function AmenityCard({
       const started = new Date(checkInTime);
       const opts = { hour: 'numeric', minute: '2-digit', timeZone: timezone || undefined };
       setStartLabel(started.toLocaleTimeString([], opts));
-      const diffMs = Date.now() - started.getTime();
-      const mins = Math.max(0, Math.floor(diffMs / 60000));
-      const hours = Math.floor(mins / 60);
-      const rem = mins % 60;
-      if (hours > 0) {
-        setElapsedLabel(`${hours}h ${rem}m`);
-      } else {
-        setElapsedLabel(`${mins}m`);
-      }
     };
     compute();
-    const id = setInterval(compute, 60 * 1000);
-    return () => clearInterval(id);
+    return () => {};
   }, [checkInTime, timezone]);
 
   const clampGuests = (val) => {
@@ -296,7 +290,10 @@ export default function AmenityCard({
                 <h3>{amenity.name}</h3>
               </div>
             </div>
-            <span className={`${badgeClass} ${effectiveStatus !== 'Closed' ? capacityTone : ''}`}>{badgeLabel}</span>
+            <span className={`${badgeClass} pill-dot ${effectiveStatus !== 'Closed' ? capacityTone : ''}`}>
+              <span className="status-dot" />
+              {badgeLabel}
+            </span>
           </div>
           <div className="meta">
             <div className="meta-item">
@@ -330,21 +327,39 @@ export default function AmenityCard({
               <strong>{utilizationPct}%</strong>
             </div>
           </div>
+          <p className="muted tiny" style={{ margin: '4px 0 6px' }}>
+            Updated {lastUpdated ? `${Math.max(0, Math.round((Date.now() - lastUpdated) / 1000))}s ago` : 'just now'}
+          </p>
           {openText && (
-            <p className="muted meta-inline">
+            <button
+              type="button"
+              className="ghost-button hours-toggle"
+              onClick={() => setShowHours((v) => !v)}
+            >
               <ClockIcon className="meta-icon" />
-              <span>{openText}</span>
-            </p>
+              <span>{showHours ? 'Hide hours' : 'View hours'}</span>
+              <span className="chevron">{showHours ? '▲' : '▼'}</span>
+            </button>
           )}
-          {isCheckedIn && checkInTime && (
-            <div className="info-chip checked-in">
-              <strong>Checked in</strong>
-              <span>
-                {' '}since {startLabel}{elapsedLabel ? ` • ${elapsedLabel}` : ''}
-              </span>
+          {showHours && openText && (
+            <div className="hours-box">
+              <p className="muted">{openText}</p>
+              {amenity.quiet_hours && <p className="muted tiny">Quiet hours: {amenity.quiet_hours}</p>}
             </div>
           )}
-          <div className="info-chip">{infoMessage}</div>
+          {isCheckedIn && checkInTime && (
+            <div className="info-chip checked-in checked-in-row">
+              <strong>Checked in</strong>
+              <span className="muted">Since {startLabel}</span>
+            </div>
+          )}
+          {showGenerate && onGenerateQr && (
+            <div className="actions" style={{ marginTop: 6 }}>
+              <button className="ghost-button" type="button" onClick={() => onGenerateQr(amenity)}>
+                Generate QR
+              </button>
+            </div>
+          )}
           <label className="input-group inline">
             <span>Guests</span>
             <div className="guest-input-wrap">

@@ -221,6 +221,17 @@ body {
   margin: 10px 0 4px;
 }
 
+.hero-kpi.compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+}
+.hero-kpi.compact .kpi-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
 .ghost-contrast {
   background: rgba(255, 255, 255, 0.06);
   color: #f8fbff;
@@ -237,6 +248,8 @@ body {
   flex-wrap: wrap;
   gap: 8px;
 }
+.hero-meta { display: none; }
+.hero-kpi:not(.compact) { display: none; }
 
 .pill.badge {
   padding: 8px 12px;
@@ -433,11 +446,11 @@ body {
 
 .mini-bars {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   align-items: end;
-  margin: 12px 0 6px;
-  height: 140px;
+  margin: 8px 0 6px;
+  height: 110px;
 }
 
 .bar-col {
